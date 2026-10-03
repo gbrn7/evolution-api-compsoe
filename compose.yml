@@ -1,0 +1,60 @@
+services:
+
+  evolution-api:
+    container_name: evolution_api
+    image: evoapicloud/evolution-api:latest
+    restart: always
+
+    depends_on:
+      - postgres
+      - redis
+
+    ports:
+      - "127.0.0.1:8080:8080"
+
+    env_file:
+      - .env
+
+    volumes:
+      - evolution_instances:/evolution/instances
+
+    networks:
+      - evolution-network
+
+  postgres:
+    container_name: evolution_postgres
+    image: postgres:15
+    restart: always
+
+    environment:
+      POSTGRES_DB: evolution
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: CHANGE_ME
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - evolution-network
+
+  redis:
+    container_name: evolution_redis
+    image: redis:7-alpine
+    restart: always
+
+    command: redis-server --appendonly yes
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - evolution-network
+
+volumes:
+  evolution_instances:
+  postgres_data:
+  redis_data:
+
+networks:
+  evolution-network:
+    driver: bridge
